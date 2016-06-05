@@ -101,7 +101,6 @@ int openFile(FileS *fileList, char *name, int user, int cantFiles){
     }
 }
 
-
 /**
 * Intenta cerrar un archivo
 *
@@ -230,8 +229,7 @@ int writeFile(FileS* fileList, int fd, int usrId, int cantFiles, int bufSize, ch
 * buf: Buffer a escribir
 *
 * 1 -> Lectura correcta
-* 2 -> Error: espacio insuficiente
-* 3 -> Error: acceso denegado
+* 2 -> Error: acceso denegado
 * -1 -> Error: El archivo no está en la lista
 **/
 int readFile(FileS* fileList, int fd, int usrId, int cantFiles, int bufSize, char *buf){
@@ -239,21 +237,17 @@ int readFile(FileS* fileList, int fd, int usrId, int cantFiles, int bufSize, cha
     //Archivo no en lista
     if(i == -1)
         return -1;
+    //copiado exitoso
     if(fileList[i].prop == usrId){
         int availableBuffer = strlen(fileList[i].content) - fileList[i].index;
         if(availableBuffer == 0){
             memset(buf, '\0', bufSize);
             return 1;
         }
-        else if(bufSize <= availableBuffer){
-            strncpy(buf, fileList[i].content + fileList[i].index, bufSize);
-            fileList[i].index += bufSize;
-            //copiado exitoso
-            return 1;
-        }
-        //Espacio insuficiente, acceso denegado
-        else
-            return 2;
+        bufSize = MIN(bufSize, availableBuffer);
+        strncpy(buf, fileList[i].content + fileList[i].index, bufSize);
+        fileList[i].index += bufSize;
+        return 1;
     }
     //No se puede escribir, permiso denegado
     else

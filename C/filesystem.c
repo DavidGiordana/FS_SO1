@@ -469,9 +469,6 @@ void *worker(void *arg){
                                 sprintf(salida, "ERROR: El archivo \"%s\" no existe", parsedInfo->str);
                             }
                             else if (aux == 2){
-                                sprintf(salida, "ERROR: Ha excedido la informacion a leer");
-                            }
-                            else if (aux == 3){
                                 sprintf(salida, "ERROR: El archivo está en uso");
                             }
                             mq_send(clientList[clientId], salida, strlen(salida) + 1, 0);
