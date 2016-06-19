@@ -132,7 +132,23 @@ getFile([H|T], Key, Value)->
                 true ->
                     getFile(T, Key, Value)
             end;
-        _Else -> {error}
+        _Else -> error
+    end.
+
+% Dado un descriptor de archivo y una lista de archivos retorna el nombre del mismo
+%
+%* FileList: Lista de archivos
+%* Fd: Descriptor de archivos
+%
+%> Nombre del archivo
+%> error -> No existe archivo con ese descriptor
+getNameOfFd(FileList, Fd)->
+    Data = getFile(FileList, fd, Fd),
+    case Data of
+        {Name, _, _, _, _} ->
+            Name;
+        _Else ->
+            error
     end.
 
 % Intenta cerrar un archivo
@@ -158,19 +174,26 @@ closeFile([H|T], Fd, New)->
 %
 %* FileList: Lista de archivos
 %* UserId: Usuario
+%* ToDelete: Archivos a eliminar
 %
 %> Tabla de archivos resultante
-closeAllUserFile(FileList, UserId)->
-    closeAllUserFile(FileList, UserId, []).
-closeAllUserFile([], _, Cache)->
-    Cache;
-closeAllUserFile([H|T], UserId, Cache)->
+closeAllUserFile(FileList, UserId, ToDelete)->
+    closeAllUserFile(FileList, UserId, ToDelete, []).
+closeAllUserFile([], _, ToDelete, Cache)->
+    {Cache, ToDelete};
+closeAllUserFile([H|T], UserId, ToDelete, Cache)->
     {Name, Content, _, Usr, _} = H,
     if
         Usr == UserId ->
-            closeAllUserFile(T, UserId, lists:append(Cache, [{Name, Content, 0, 0, 0}]));
+            S = lists:member(Name, ToDelete),
+            if
+                S ->
+                    closeAllUserFile(T, UserId, lists:delete(Name, ToDelete), Cache);
+                true ->
+                    closeAllUserFile(T, UserId, ToDelete, lists:append(Cache, [{Name, Content, 0, 0, 0}]))
+            end;
         true ->
-            closeAllUserFile(T, UserId, lists:append(Cache, [H])) end.
+            closeAllUserFile(T, UserId, ToDelete, lists:append(Cache, [H])) end.
 
 % Indica si existe un archivo
 %

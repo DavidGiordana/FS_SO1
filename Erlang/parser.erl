@@ -13,7 +13,6 @@
 %
 %* Str: String a parsear
 parse(String)->
-    Tok = tokens(),
     if
         length(String) < 3 ->
             {error, ["Parse error, Comando inválido"]};
@@ -32,6 +31,14 @@ parse(String)->
                         true ->
                             {L1, _} = splitFirst(Args),
                             {del, [L1]}
+                    end;
+                "RM" ->
+                    if
+                        NArgs < 1 ->
+                            {error, ["Parse error, Argumentos inválidos"]};
+                        true ->
+                            {L1, _} = splitFirst(Args),
+                            {rm, [L1]}
                     end;
                 "CRE" ->
                     if
