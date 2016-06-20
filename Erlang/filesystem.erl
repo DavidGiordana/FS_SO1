@@ -30,8 +30,6 @@
 %    readFile/3
 %    writeFile/4
 
-%io:format("~p~p~p~n", [c(filemodule),c(parser),c(s)]),s:inicio().
-
 % START HERE
 inicio() ->
     lists:map(fun(N) -> spawn(?MODULE, worker, [N]) end, lists:seq(1,5)),
@@ -193,7 +191,7 @@ worker(PidList, Files, Cache, RequestList, LastFD, MsgCounter, Safe, ToDelete) -
                                         worker(PidList, Files, Cache, RequestList, LastFD, 1, no, ToDelete);
                                     _Else ->
                                         getUserName(ClientId) ! {ok, ""},
-                                        worker(PidList, Files, Cache, Tail, LastFD, MsgCounter, no, addUnique(ToDelete, [FileName]))
+                                        worker(PidList, Files, Cache, Tail, LastFD, MsgCounter, no, addUnique(FileName, ToDelete))
                                  end;
     		              MsgCounter == 5 ->
                                 case Cache of
@@ -205,8 +203,8 @@ worker(PidList, Files, Cache, RequestList, LastFD, MsgCounter, Safe, ToDelete) -
 						    			worker(PidList, Files, [], Tail, LastFD, 0, no, ToDelete)
     						   	end;
                           Safe == no ->
-                            lists:nth(MsgCounter, PidList) ! {rmFileReq, FileName, self()},
-                            worker(PidList, Files, Cache, RequestList, LastFD, MsgCounter, yes, ToDelete);
+                              lists:nth(MsgCounter, PidList) ! {rmFileReq, FileName, self()},
+                              worker(PidList, Files, Cache, RequestList, LastFD, MsgCounter, yes, ToDelete);
                           true -> ok
                 	end;
 
@@ -229,7 +227,7 @@ worker(PidList, Files, Cache, RequestList, LastFD, MsgCounter, Safe, ToDelete) -
                                     getUserName(ClientId) ! {error, "El archivo ya existe"},
                                     worker(PidList, Files, [], Tail, LastFD, 0, no, ToDelete);
                                 _Else ->
-                                    getUserName(ClientId) ! {ok, []},
+                                    getUserName(ClientId) ! {ok, ""},
                             	    worker(PidList, filemodule:createFile(Files, FileName), [], Tail, LastFD, 0, no, ToDelete)
                             end;
                             Safe == no ->
@@ -246,7 +244,7 @@ worker(PidList, Files, Cache, RequestList, LastFD, MsgCounter, Safe, ToDelete) -
                 			case FileState of
                                 closed ->
                                     pidCast(PidList, {incFD}),
-                                    getUserName(ClientId) ! {ok, "FD "++integer_to_list(LastFD + 1)},
+                                    getUserName(ClientId) ! {ok, "FD " ++ integer_to_list(LastFD + 1)},
                                     worker(PidList, filemodule:openFile(FileName, Files, ClientId, LastFD + 1), Cache, Tail, LastFD + 1, 0, no, ToDelete);
                                 Temp when (Temp == noallow) or (Temp == ok) ->
                                     getUserName(ClientId) ! {error, "El archivo ya esta abierto"},
@@ -456,8 +454,8 @@ worker(PidList, Files, Cache, RequestList, LastFD, MsgCounter, Safe, ToDelete) -
                                 worker(PidList, filemodule:removeFile(Files, FileName1), Cache, RequestList, LastFD, MsgCounter, Safe, ToDelete)
                         end;
                     ok ->
-                        worker(PidList, Files, Cache, RequestList, LastFD, MsgCounter, Safe, addUnique(FileName1, ToDelete)),
-                        WorkerPid ! {rmFileRes, ok};
+                        WorkerPid ! {rmFileRes, ok},
+                        worker(PidList, Files, Cache, RequestList, LastFD, MsgCounter, Safe, addUnique(FileName1, ToDelete));
                   _Else1 ->
                         WorkerPid ! {rmFileRes, error}
             end;
@@ -507,25 +505,25 @@ worker(PidList, Files, Cache, RequestList, LastFD, MsgCounter, Safe, ToDelete) -
 
         {writeFileRes, Data} ->
             case Data of
-              closed -> worker(PidList, Files, [closed], RequestList, LastFD, 5, no, ToDelete);
-              ok -> worker(PidList, Files, [ok], RequestList, LastFD, 5, no, ToDelete);
-              denied -> worker(PidList, Files, [denied], RequestList, LastFD, 5, no, ToDelete);
-              _Else1 -> worker(PidList, Files, [error], RequestList, LastFD, MsgCounter + 1, no, ToDelete)
+                closed -> worker(PidList, Files, [closed], RequestList, LastFD, 5, no, ToDelete);
+                ok -> worker(PidList, Files, [ok], RequestList, LastFD, 5, no, ToDelete);
+                denied -> worker(PidList, Files, [denied], RequestList, LastFD, 5, no, ToDelete);
+                _Else1 -> worker(PidList, Files, [error], RequestList, LastFD, MsgCounter + 1, no, ToDelete)
             end;
 
         {readFileReq, WorkerPid, Fd1, ClientId1, Size1} ->
             FileState1 = filemodule:isUsableFile(Files, fd, Fd1, ClientId1),
             case FileState1 of
                 closed ->
-                    WorkerPid ! {readFileRes, closed, basura};
+                    WorkerPid ! {readFileRes, closed, error};
                 ok ->
                     {List2, NewList1} = filemodule:readFile(Files, Fd1, Size1),
  					WorkerPid ! {readFileRes, ok, NewList1},
                     worker(PidList, List2, Cache, RequestList, LastFD, MsgCounter, Safe, ToDelete);
                 noallow ->
-                    WorkerPid ! {readFileRes, denied, basura};
+                    WorkerPid ! {readFileRes, denied, error};
                 _Else1 ->
-                    WorkerPid ! {readFileRes, error, basura}
+                    WorkerPid ! {readFileRes, error, error}
             end;
 
         {readFileRes, Data, NewList1} ->
@@ -635,7 +633,7 @@ addUnique(Item, List)->
     T = lists:member(Item, List),
     if
         T ->
-            ToDelete;
+            List;
         true ->
             lists:append(List, [Item])
     end.
