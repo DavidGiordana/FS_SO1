@@ -26,7 +26,7 @@ typedef struct mq_attr mq_at;
 #define MAX_FILES 50 //Cantidad de archivos
 #define NUM_WORKERS 5 //Cantidad de workers
 #define BUFF_SIZE 2048 //Tamaño del buffer
-#define PORT 8001 //Puerto del servidor
+#define PORT 8000 //Puerto del servidor
 #define MAX_CLIENTS 32 //Cantidad máxima de clientes
 
 //Retorna el identificador del worker

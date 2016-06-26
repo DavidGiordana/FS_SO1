@@ -37,7 +37,7 @@ inicio() ->
 
 % Inicia el server
 server() ->
-    D = gen_tcp:listen(8001, [{active, true}]),
+    D = gen_tcp:listen(8000, [{active, true}]),
     case D of
         {ok, ListenSocket}->
             clearScreen(),

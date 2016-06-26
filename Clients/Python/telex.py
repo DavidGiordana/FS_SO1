@@ -131,7 +131,7 @@ def main():
 
 def salame(threadName, user):
     HOST = "127.0.0.1"
-    PORT = 8001
+    PORT = 8000
     tn = telnetlib.Telnet(HOST, PORT)
 
     con = "CON  "
@@ -146,7 +146,7 @@ def salame(threadName, user):
     sys.stdout.write("Para usuario: " + str(user) + tn.read_some())
 
     time.sleep(1)
-    
+
     while(flag == 1):
         randwait = random.randint(1,5)
         time.sleep(randwait)

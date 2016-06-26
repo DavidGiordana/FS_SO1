@@ -26,7 +26,7 @@ class Telex{
 
 	//DAtos de conexion por defecto
 	public static final String DEFAULT_IP = "127.0.0.1";
-	public static final int DEFAULT_PORT = 8001;
+	public static final int DEFAULT_PORT = 8000;
 
 	//Códigos de comandos válidos
 	public static final int ERROR = -1;
@@ -51,7 +51,7 @@ class Telex{
 			"BYE"
 	};
 
-	//Posible nombres de archivos 
+	//Posible nombres de archivos
 	public static final String[] possibleNames = {"aa", "bb", "cc", "dd", "ee", "ff", "gg", "hh", "ii", "jj", "kk", "ll", "mm","nn", "oo", "pp", "qq", "rr", "ss", "tt", "uu", "vv", "ww", "yy", "zz"};
 
 	//Posibles contenidos de archivos
@@ -81,7 +81,7 @@ class Telex{
 
 	/**
 	 * Crea una linea de mensaje
-	 * @param com Valor del comando 
+	 * @param com Valor del comando
 	 * @param fd Descriptor de archivo, 0 indica que no se usa
 	 * @param size Tamaño, 0 indica que no se usa
 	 * @param str Cadena de texto, "" indica que no se usa
@@ -126,16 +126,16 @@ class Telex{
 		int fd = rand.nextInt(possibleNames.length) + 1;
 		int size = rand.nextInt(3) + 1;
 		String str = possibleContent[rand.nextInt(possibleContent.length)].substring(0, size);
-		if(com == CON || com == LSD || com == BYE){      
+		if(com == CON || com == LSD || com == BYE){
 			return createInstruction(com, 0, 0, "");
 		}
 		else if(com == CRE){
 			return createInstruction(com, 0, 0, str);
 		}
-		else if(com == OPN || com == CLO){  
+		else if(com == OPN || com == CLO){
 			return createInstruction(com, fd, 0, "");
 		}
-		else if(com == WRT){    
+		else if(com == WRT){
 			return createInstruction(com, fd, size, str);
 		}
 		else if(com == REA){
@@ -166,7 +166,7 @@ class Telex{
 	}
 
 	/**
-	 * Cliente para comunicarse con servidor de archivos 
+	 * Cliente para comunicarse con servidor de archivos
 	 * @author David Giordana
 	 *
 	 */
@@ -212,7 +212,7 @@ class Telex{
 					String line = gemerateRandomInstruction();
 					stop = line.startsWith(COMANDS[BYE]);
 					sendAndReceive(line);
-				}   
+				}
 			}
 			else{
 				while(!queue.isEmpty()){
@@ -241,7 +241,7 @@ class Telex{
 				temp += "recibe: \"" + str + "\"\n";
 			}
 			System.out.println(temp);
-		}    
+		}
 
 		/**
 		 * Envia y recibe un mensaje al servidor
@@ -249,7 +249,7 @@ class Telex{
 		 */
 		private void sendAndReceive(String str){
 			try{
-				printMessage(str, true);				
+				printMessage(str, true);
 				out.println(str + "  ");
 				Thread.sleep(500);
 				String read = in.readLine();
@@ -296,7 +296,7 @@ class Telex{
 				file = new File(str);
 				ok &= file.exists();
 				nextFile = false;
-			}		    
+			}
 			else if(str.compareTo("ip") == 0){
 				nextIp = true;
 			}
@@ -313,7 +313,7 @@ class Telex{
 				return false;
 			}
 		}
-		return ok;	
+		return ok;
 	}
 
 	/**
@@ -325,7 +325,7 @@ class Telex{
 	 */
 	public static void main(String[] args){
 		if(!parserCommandLineArgs(args)) return;
-		
+
 		//Mensajes al azar al servidor
 		if(isRandom){
 			for(int i = 0; i < cantusers; i++){
