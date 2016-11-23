@@ -28,10 +28,10 @@ readFile([H|T], Fd, Size, Cache, Readed) ->
         Fd == FD ->
             if
                 ContentSize == 0 ->
-                    Temp = lists:append(Cache, T),
+                    Temp = lists:append([Cache, [H], T]),
                     {Temp, ""};
                 Index == ContentSize ->
-                    Temp = lists:append(Cache, T),
+                    Temp = lists:append(Cache, [H], T),
                     {Temp, ""};
                 true ->
                     Temp = string:sub_string(Content, Index, Index + Size),
